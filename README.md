@@ -19,10 +19,10 @@ Smart features:
 | Area | Member | GitHub |
 |---|---|---|
 | Lead, planning, architecture, review | Matteo | @matteoovalee |
-| Requirements and use cases | | |
-| UI/UX design | | |
-| Development | | |
-| Testing | | |
+| Requirements and use cases | Hizkia | @abeemaell |
+| UI/UX design | Sai | @MightBeKuki |
+| Development | Xiang | @xiangjinyu19-netizen |
+| Testing | Abbod | @AbdullahAbbod |
 
 ## Repository structure
 
