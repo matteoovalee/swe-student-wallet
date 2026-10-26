@@ -5,15 +5,18 @@ from urllib.request import urlopen
 
 import streamlit as st
 
+BASE_CURRENCY = "MYR"
+TARGET_CURRENCIES = ["EUR", "USD", "CNY", "INR", "SAR"]
 
-BASE_CURRENCY = "SGD"
-TARGET_CURRENCIES = ["USD", "MYR", "EUR"]
-
-# For demonstration purposes only—to be used when the API is unavailable; these are not real-time exchange rates.
+# Used only when the API is unavailable and nothing is cached yet.
+# Demonstration values for 1 MYR, calculated from the frankfurter.dev rates of 25 Oct 2026.
+# They are not real-time exchange rates.
 DEMO_FALLBACK = {
-    "USD": 0.74,
-    "MYR": 3.30,
-    "EUR": 0.68,
+    "EUR": 0.2183,
+    "USD": 0.2449,
+    "CNY": 1.6325,
+    "INR": 23.21,
+    "SAR": 0.9184,
 }
 
 
@@ -24,13 +27,10 @@ def fetch_rates():
         "quotes": ",".join(TARGET_CURRENCIES),
     })
     url = f"https://api.frankfurter.dev/v2/rates?{query}"
-
     with urlopen(url, timeout=10) as response:
         rows = json.loads(response.read().decode("utf-8"))
-
     rates = {row["quote"]: row["rate"] for row in rows}
     rate_date = rows[0]["date"] if rows else "Unknown"
-
     return rates, rate_date
 
 
@@ -43,5 +43,4 @@ def get_rates():
         if "last_good_rates" in st.session_state:
             rates, rate_date = st.session_state["last_good_rates"]
             return rates, rate_date, "Cached data"
-
         return DEMO_FALLBACK, "Demo values", "Fallback data"
