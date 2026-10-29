@@ -7,3 +7,6 @@ Low-fidelity screens of the Student Wallet, made in Figma (issue #6).
 - forecast-alerts.png: balance forecast, alerts and alert settings
 
 Figma file: https://www.figma.com/design/OUeFouFwRPYrfb4Jaok4kV/Student-Wallet
+## Slide template
+
+[Student Wallet – Google Slides](https://docs.google.com/presentation/d/1ckQbXZcwGGD7Ia6V4as7VqPV_wuQxb1vSON3BfPTkTI/edit?usp=sharing)
