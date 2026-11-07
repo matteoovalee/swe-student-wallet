@@ -12,19 +12,21 @@
 
 ## How we work
 
-We use Scrum in a simple form: one-week sprints, from Monday to Sunday. Every sprint has a goal and a milestone on GitHub. Tasks are issues on the project board (Todo, In Progress, Done). Every task gets its own branch and pull request, and the pull request says which issue it closes. At the end of a sprint we tag the version on main.
+We use Scrum in a simple form: one-week sprints. Every sprint has a goal and a milestone on GitHub. Tasks are issues on the project board (Todo, In Progress, Done). Every task gets its own branch and pull request, and the pull request says which issue it closes. At the end of a sprint we tag the version on main.
 
-We talk in the group chat and meet at the Wednesday tutorial (12:00-14:00). Notes of each meeting go in 01-Planning/meeting-notes/.
+We do not hold separate meetings. We coordinate in the group chat, and the work itself is discussed in the issues and in the pull request reviews. At the end of each sprint Matteo writes a short review in `sprint-log.md`: what was planned, what was done, what we change.
 
 ## Timeline
 
+Changed on 7 Nov after the midterm week (see `sprint-log.md`).
+
 | Sprint | Dates (2026) | Goal |
 |---|---|---|
-| 1 | 19-25 Oct | idea, user stories, requirements, use case list, survey |
-| 2 | 26 Oct - 1 Nov | use case diagram and descriptions, architecture, ER diagram, wireframes, app skeleton |
-| 3 | 2-8 Nov | main and smart features, test cases |
-| 4 | 9-15 Nov | run the tests, try the app with students, fix problems |
-| 5 | 16-22 Nov | report, slides, rehearsals |
+| 1 | 19-25 Oct | idea, user stories, requirements, survey |
+| 2 | 26 Oct - 8 Nov | review and completion of the Sprint 1 work (second week: midterm exams) |
+| 3 | 9-15 Nov | use case diagram and descriptions, architecture, ER diagram, categories, import and dashboard pages, test cases |
+| 4 | 16-22 Nov | forecast and rate alert, login, run the tests, try the app with students, report and slides |
+| 5 | 23 Nov - submission | freeze, rehearsal, submission and presentation |
 
 Submission and presentation: Week 10 (23-27 Nov).
 
