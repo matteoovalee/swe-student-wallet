@@ -1,15 +1,15 @@
 # Planning
 
-Team and roles, project plan (`project-plan.md`), and meeting notes (`meeting-notes/`, one file per meeting).
+Team and roles and timeline (`project-plan.md`), and a short review of every sprint (`sprint-log.md`).
 
 ## Sprints
 
-All sprint deadlines are Sundays, 21:00 Kuala Lumpur time.
+All deadlines are 21:00 Kuala Lumpur time. From Sprint 3, every sprint has a draft deadline on Thursday and a final deadline on Sunday. The plan was changed on 7 Nov, see `sprint-log.md`.
 
-| Sprint | Week ending (2026) | Goal | Tag |
+| Sprint | Dates (2026) | Goal | Tag |
 |---|---|---|---|
-| 1 | 25 Oct | idea, user stories, requirements, use case list, survey online | v0.1-requirements |
-| 2 | 1 Nov | use cases, architecture, ER, wireframes, app skeleton | v0.2-design |
-| 3 | 8 Nov | core and smart features, test cases written | v0.3-alpha |
-| 4 | 15 Nov | test execution, UAT, fixes, retest | v0.4-tested |
-| 5 | 22 Nov | report, slides, rehearsals, freeze | v1.0-final |
+| 1 | 19-25 Oct | idea, user stories, requirements, survey | v0.1-requirements |
+| 2 | 26 Oct - 8 Nov | review and completion of the Sprint 1 work (second week: midterm exams) | |
+| 3 | 9-15 Nov | use case diagram and descriptions, architecture, ER, categories, import and dashboard pages, test cases | v0.2-design |
+| 4 | 16-22 Nov | forecast and rate alert, login, test execution, user tests, report and slides | v0.3-tested |
+| 5 | 23 Nov - submission | freeze, rehearsal, submission and presentation | v1.0-final |
