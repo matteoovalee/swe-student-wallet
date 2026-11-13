@@ -30,3 +30,18 @@ from smart.categorize import categorize
 )
 def test_categorize_transaction_merchants(merchant, expected):
     assert categorize(merchant) == expected
+
+
+@pytest.mark.parametrize(
+    ("merchant", "expected"),
+    [
+        ("BUSINESS CENTRE", "Other"),
+        ("CURRENT ACCOUNT FEE", "Other"),
+        ("grab*trip", "Transport"),
+        ("", "Other"),
+        (None, "Other"),
+        (float("nan"), "Other"),
+    ],
+)
+def test_categorize_edge_cases(merchant, expected):
+    assert categorize(merchant) == expected
