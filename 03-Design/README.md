@@ -18,6 +18,16 @@ Each box shows the functional requirements it covers (see `02-Requirements/requi
 
 To edit the diagram, open `architecture.drawio.svg` in draw.io (app.diagrams.net) and save it again with the same name.
 
+## Entity-relationship diagram
+
+![ER diagram](er-diagram.drawio.svg)
+
+The ER diagram shows the data behind the app. `users` holds the three roles (student, sponsor, admin) and the home currency of each user. `transactions` belong to one user and one category, and `category_source` tells if the category was set automatically or changed by the student (FR-02, FR-03). `categories` and `category_keywords` are used for the automatic categorisation (FR-02, FR-11). `budgets` keeps the monthly budget in MYR (FR-05, FR-09) and `alerts` the target exchange rate of each user (FR-07). `sponsor_links` connects a student with a sponsor and has a status, for example pending or accepted (FR-10). `rates` keeps the rate history from frankfurter.dev (FR-12) and has no foreign key.
+
+The prototype stores this data in simple files instead of a database, with the same fields.
+
+To edit the diagram, open `er-diagram.drawio.svg` in draw.io (app.diagrams.net) and save it again with the same name.
+
 ## Wireframes
 
 Low-fidelity screens made in Figma (issue #6).
