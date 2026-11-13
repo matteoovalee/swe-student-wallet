@@ -1,3 +1,5 @@
+import re
+
 CATEGORY_KEYWORDS = {
     "Transport": [
         "GRAB",
@@ -42,11 +44,19 @@ CATEGORY_KEYWORDS = {
 }
 
 
+def _has_keyword(keyword, merchant_name):
+    # whole-word match: "RENT" must not match "CURRENT", "BUS" must not match "BUSINESS"
+    return re.search(rf"\b{re.escape(keyword)}\b", merchant_name) is not None
+
+
 def categorize(merchant):
+    if not isinstance(merchant, str):
+        return "Other"
+
     merchant_name = merchant.upper()
 
     for category, keywords in CATEGORY_KEYWORDS.items():
-        if any(keyword in merchant_name for keyword in keywords):
+        if any(_has_keyword(keyword, merchant_name) for keyword in keywords):
             return category
 
     return "Other"
