@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 
@@ -5,6 +7,8 @@ from smart.categorize import categorize
 
 
 st.set_page_config(page_title="Student Wallet", page_icon="💳")
+
+SAMPLE_CSV = Path(__file__).parent / "data" / "transactions.csv"
 
 if "transactions" not in st.session_state:
     st.session_state["transactions"] = None
@@ -18,10 +22,31 @@ if selected_page == "Dashboard":
     transactions = st.session_state["transactions"]
 
     if transactions is None:
-        st.info("Import a CSV file from the Transactions page to get started.")
+        st.info(
+            "Showing the sample data. Import your own CSV file on the "
+            "Transactions page to see your spending."
+        )
+        df = pd.read_csv(SAMPLE_CSV, encoding="utf-8-sig")
     else:
-        st.write(f"Imported transactions: {len(transactions)}")
-        st.dataframe(transactions, hide_index=True)
+        df = transactions.copy()
+
+    if "category" not in df.columns:
+        df["category"] = df["merchant"].apply(categorize)
+    df["month"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m")
+    selected_month = st.selectbox("Select Month", sorted(df["month"].unique(), reverse=True))
+    month_df = df[df["month"] == selected_month]
+
+    expenses = month_df[(month_df["amount"] < 0) & (month_df["currency"] == "MYR")]
+    total_spending = -expenses["amount"].sum()
+    st.metric("Total Monthly Spending", f"RM {total_spending:,.2f}")
+
+    if expenses.empty:
+        st.info("No MYR expenses in this month.")
+    else:
+        category_spending = expenses.groupby("category")["amount"].sum().abs()
+        st.subheader("Spending by Category")
+        st.bar_chart(category_spending)
+        st.dataframe(category_spending.rename("Spending (RM)").reset_index())
 
 elif selected_page == "Transactions":
     uploaded_file = st.file_uploader("Upload a transactions CSV", type=["csv"])
