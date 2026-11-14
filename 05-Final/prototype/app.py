@@ -43,17 +43,29 @@ elif selected_page == "Transactions":
                 )
             else:
                 preview = uploaded_data[required_columns].copy()
-                preview["category"] = preview["merchant"].apply(categorize)
+                valid_dates = pd.to_datetime(preview["date"], errors="coerce")
+                valid_amounts = pd.to_numeric(preview["amount"], errors="coerce")
+                bad_rows = preview[valid_dates.isna() | valid_amounts.isna()]
 
-                st.subheader("Preview")
-                st.dataframe(preview, hide_index=True)
-
-                if st.button("Confirm import"):
-                    st.session_state["transactions"] = preview
-                    st.success(
-                        f"Imported {len(preview)} transactions. "
-                        "They are now available on the Dashboard."
+                if not bad_rows.empty:
+                    # +2: the header is line 1 and the index starts at 0
+                    lines = ", ".join(str(i + 2) for i in bad_rows.index[:5])
+                    st.error(
+                        f"{len(bad_rows)} row(s) have an invalid date or amount "
+                        f"(CSV line {lines}). Nothing was imported."
                     )
+                else:
+                    preview["category"] = preview["merchant"].apply(categorize)
+
+                    st.subheader("Preview")
+                    st.dataframe(preview, hide_index=True)
+
+                    if st.button("Confirm import"):
+                        st.session_state["transactions"] = preview
+                        st.success(
+                            f"Imported {len(preview)} transactions. "
+                            "They are now available on the Dashboard."
+                        )
 
         except Exception as error:
             st.error(f"Could not read the CSV file: {error}")
