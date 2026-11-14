@@ -16,6 +16,10 @@ What we change: issues with an example of the expected result, and a draft deadl
 
 A two-week sprint, because the second week was the midterm exam week. No new issues: the first week went into reviewing the Sprint 1 pull requests, asking for changes and merging them (#16 to #23). In the midterm week there was no work on the project. Use case diagram, architecture and ER diagram did not start, so they move to Sprint 3.
 
+## Sixth member (11 Nov, Week 8)
+
+Abrar (@ahnaf-297) joined on 11 Nov with the lecturer's approval, because he had no group and all other groups already had five members. The group has six members (the brief says five). The five original members keep their tasks and deadlines. Abrar's tasks start in Sprint 4: a review of the repository, two user test sessions and the GitHub screenshots for the report. Each has a deadline earlier than the sprint deadline, so the project does not depend on them. A task that is not delivered is taken over by another member: the issue is reassigned, labelled `taken-over` and commented with the date.
+
 ## Re-planning (7 Nov)
 
 Two weeks are left before Week 10, so we have one sprint for design and the main screens (Sprint 3, 9-15 Nov) and one for the smart features, testing, report and slides (Sprint 4, 16-22 Nov). Sprint 5 is the submission week.
