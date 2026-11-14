@@ -12,7 +12,7 @@ Actors: student, sponsor/parent (read-only), admin, exchange-rate service (exter
 Smart features:
 1. Automatic expense categorisation (keyword rules on the merchant name)
 2. End-of-month balance forecast in the home currency
-3. "Good time to transfer" alert when the rate is above its 30-day average (a rule, not a prediction)
+3. "Good time to transfer" alert when the rate is above its 30-day average (a simple rule on past rates)
 
 ## Team
 
@@ -23,9 +23,9 @@ Smart features:
 | UI/UX design | Sai | @MightBeKuki |
 | Development | Xiang | @xiangjinyu19-netizen |
 | Testing | Abbod | @AbdullahAbbod |
-| Fresh-eyes review, user tests, evidence (joined in Week 8) | Abrar | @ahnaf-297 |
+| Review, user tests, evidence (joined in Week 8) | Abrar | @ahnaf-297 |
 
-Abrar joined the group on 11 Nov (Week 8), with the lecturer's approval. He had no group and every other group already had five members, so we are six. He joins after most of the planning, requirements and design work is done, so his tasks start in Sprint 4 and the project does not depend on them. See `01-Planning/project-plan.md`.
+Abrar joined the group on 11 Nov (Week 8), with the lecturer's approval. He had no group and all the other groups had five members, so we are six. His tasks start in Sprint 4 and the rest of the project does not wait for them. See `01-Planning/project-plan.md`.
 
 ## Repository structure
 
