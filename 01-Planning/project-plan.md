@@ -9,15 +9,13 @@
 | UI/UX design | Sai | @MightBeKuki |
 | Development | Xiang | @xiangjinyu19-netizen |
 | Testing | Abbod | @AbdullahAbbod |
-| Fresh-eyes review, user tests, evidence (joined in Week 8) | Abrar | @ahnaf-297 |
+| Review, user tests, evidence (joined in Week 8) | Abrar | @ahnaf-297 |
 
 ## Team change (11 Nov, Week 8)
 
-Abrar Ahnaf (@ahnaf-297) joined the group on 11 Nov, with the lecturer's approval: the course had a student without a group and all other groups already had five members. The group now has six members, not the five of the assignment brief. The tasks and deadlines of the five original members do not change.
+Abrar Ahnaf (@ahnaf-297) joined the group on 11 Nov, with the lecturer's approval. He had no group and all the other groups already had five members. We are now six, and the brief says five. The tasks and deadlines of the other five do not change.
 
-He joins after the requirements, the architecture and most of the planning are done, so his tasks start in Sprint 4 and are planned so that nothing depends on them: a fresh-eyes review of the repository (up to five issues titled "Review: ..."), two user test sessions with Abbod, and the GitHub screenshots for the Supporting Evidence chapter of the report.
-
-Each of his tasks is an issue assigned to him, with a deadline earlier than the sprint deadline. If a task is not delivered by its deadline, another member of the group, usually Matteo, takes it over: the issue is reassigned, gets the label `taken-over`, and a comment with the date says what happened. The same rule applies to every member. The contribution table in the report is built from these issues and from the pull requests.
+His tasks start in Sprint 4: a check of the repository and the app, two user test sessions with Abbod, and the GitHub screenshots for the Supporting Evidence chapter. Each task is an issue with a deadline before the end of the sprint. If a task is not done by then, someone else in the group (usually Matteo) does it. We reassign the issue, add the label `taken-over` and write the date in a comment. The rule is the same for everyone. The contribution table in the report comes from the issues and the pull requests.
 
 ## How we work
 

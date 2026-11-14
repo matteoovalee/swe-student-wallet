@@ -4,7 +4,7 @@ Team and roles and timeline (`project-plan.md`), and a short review of every spr
 
 ## Sprints
 
-All deadlines are 21:00 Kuala Lumpur time. From Sprint 3, every sprint has a draft deadline on Thursday and a final deadline on Sunday. The plan was changed on 7 Nov, see `sprint-log.md`.
+All deadlines are at 21:00. From Sprint 3, every sprint has a draft deadline on Thursday and a final deadline on Sunday. The plan changed on 7 Nov, see `sprint-log.md`.
 
 | Sprint | Dates (2026) | Goal | Tag |
 |---|---|---|---|
