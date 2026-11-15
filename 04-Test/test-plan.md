@@ -58,9 +58,8 @@ The team will confirm these responsibilities and help test the app.
 
 | Dates in 2026 | Planned work |
 |---|---|
-| 2-8 November, Sprint 3 | Write test cases, prepare data, and start unit and integration tests as features become available. |
-| 9-12 November, Sprint 4 | Run system and user tests, check performance and permissions, and record bugs. |
-| 13-15 November, Sprint 4 | Fix and retest bugs, check affected features again, and complete the test records. |
+| 9–15 November, Sprint 3 | Write the test cases. |
+| 16–22 November, Sprint 4 | Run the tests and ask students to try the app. |
 
 ## 6. Results and Completion
 
