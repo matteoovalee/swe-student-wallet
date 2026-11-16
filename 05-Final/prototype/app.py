@@ -3,12 +3,14 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from smart.budget import budget_status, load_budget, parse_budget, save_budget
 from smart.categorize import categorize
 
 
 st.set_page_config(page_title="Student Wallet", page_icon="💳")
 
 SAMPLE_CSV = Path(__file__).parent / "data" / "transactions.csv"
+BUDGET_CSV = Path(__file__).parent / "data" / "budgets.csv"
 
 if "transactions" not in st.session_state:
     st.session_state["transactions"] = None
@@ -37,8 +39,37 @@ if selected_page == "Dashboard":
     month_df = df[df["month"] == selected_month]
 
     expenses = month_df[(month_df["amount"] < 0) & (month_df["currency"] == "MYR")]
-    total_spending = -expenses["amount"].sum()
+    total_spending = -expenses["amount"].sum() + 0.0  # + 0.0: no "-0.00" when there is no spending
     st.metric("Total Monthly Spending", f"RM {total_spending:,.2f}")
+
+    st.subheader("Monthly Budget")
+    saved_budget = load_budget(BUDGET_CSV, selected_month)
+    budget_text = st.text_input(
+        "Budget for this month (RM)",
+        value="" if saved_budget is None else f"{saved_budget:.2f}",
+        key=f"budget_{selected_month}",
+    )
+    if st.button("Save budget"):
+        try:
+            new_budget = parse_budget(budget_text)
+        except ValueError as error:
+            st.error(str(error))
+        else:
+            save_budget(BUDGET_CSV, selected_month, new_budget)
+            saved_budget = new_budget
+            st.success("Budget saved.")
+
+    if saved_budget is None:
+        st.info("No budget set for this month.")
+    else:
+        used, left = budget_status(saved_budget, total_spending)
+        budget_col, used_col, left_col = st.columns(3)
+        budget_col.metric("Budget", f"RM {saved_budget:,.2f}")
+        used_col.metric("Used", f"RM {used:,.2f}")
+        if left < 0:
+            left_col.markdown(f"Left\n\n## :red[RM {left:,.2f}]")
+        else:
+            left_col.metric("Left", f"RM {left:,.2f}")
 
     if expenses.empty:
         st.info("No MYR expenses in this month.")
