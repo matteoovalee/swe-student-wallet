@@ -15,7 +15,7 @@ The tests will cover:
 - Parent/sponsor invitations, acceptance, read-only access and removal of access.
 - Admin category changes, including moving transactions before removing a category.
 
-Real bank connections, payments and money transfers are outside the scope of this prototype.
+Real bank connections, payments and money transfers are outside the scope of this prototype. The prototype also does not include registration (it has three demo accounts), CSV export and sponsor invitations: their test cases are written but marked Not implemented.
 
 ## 2. How We Will Test
 
@@ -51,6 +51,7 @@ Automatic tests must pass on each pull request before merging.
 | Hizkia | Check that the tests cover the requirements and user stories. |
 | Sai | Check screen behaviour and help with usability testing. |
 | Matteo | Review the plan, coordinate the team and review remaining issues. |
+| Abrar | Try the app and report problems as issues, bring two students to the user tests and give the notes to Abbod. |
 
 The team will confirm these responsibilities and help test the app.
 
