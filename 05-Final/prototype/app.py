@@ -5,6 +5,7 @@ import streamlit as st
 
 from smart.budget import budget_status, load_budget, parse_budget, save_budget
 from smart.categorize import categorize
+from smart.category_edit import CATEGORIES, change_categories, prepare
 
 
 st.set_page_config(page_title="Student Wallet", page_icon="💳")
@@ -15,25 +16,30 @@ BUDGET_CSV = Path(__file__).parent / "data" / "budgets.csv"
 if "transactions" not in st.session_state:
     st.session_state["transactions"] = None
 
+# changes by 1 every time the student corrects a category, so the table starts fresh
+if "edit_version" not in st.session_state:
+    st.session_state["edit_version"] = 0
+
 pages = ["Dashboard", "Transactions", "Exchange rate"]
 selected_page = st.sidebar.radio("Navigate", pages)
 
 st.title(selected_page)
 
 if selected_page == "Dashboard":
-    transactions = st.session_state["transactions"]
-
-    if transactions is None:
+    if st.session_state["transactions"] is None:
         st.info(
             "Showing the sample data. Import your own CSV file on the "
             "Transactions page to see your spending."
         )
-        df = pd.read_csv(SAMPLE_CSV, encoding="utf-8-sig")
+        if "sample_transactions" not in st.session_state:
+            st.session_state["sample_transactions"] = prepare(
+                pd.read_csv(SAMPLE_CSV, encoding="utf-8-sig")
+            )
+        data_key = "sample_transactions"
     else:
-        df = transactions.copy()
+        data_key = "transactions"
 
-    if "category" not in df.columns:
-        df["category"] = df["merchant"].apply(categorize)
+    df = prepare(st.session_state[data_key])
     df["month"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m")
     selected_month = st.selectbox("Select Month", sorted(df["month"].unique(), reverse=True))
     month_df = df[df["month"] == selected_month]
@@ -79,6 +85,26 @@ if selected_page == "Dashboard":
         st.bar_chart(category_spending)
         st.dataframe(category_spending.rename("Spending (RM)").reset_index())
 
+    st.subheader("Transactions of the Month")
+    st.caption("Wrong category? Change it in the table. The chart and the totals update.")
+    columns = ["date", "merchant", "amount", "currency", "category", "category_source"]
+    shown = month_df[columns]
+    edited = st.data_editor(
+        shown,
+        hide_index=True,
+        disabled=[column for column in columns if column != "category"],
+        column_config={
+            "category": st.column_config.SelectboxColumn(
+                "Category", options=CATEGORIES, required=True
+            )
+        },
+        key=f"editor_{selected_month}_{st.session_state['edit_version']}",
+    )
+    if not edited["category"].equals(shown["category"]):
+        st.session_state[data_key] = change_categories(df.drop(columns="month"), edited)
+        st.session_state["edit_version"] += 1
+        st.rerun()
+
 elif selected_page == "Transactions":
     uploaded_file = st.file_uploader("Upload a transactions CSV", type=["csv"])
 
@@ -112,6 +138,7 @@ elif selected_page == "Transactions":
                     )
                 else:
                     preview["category"] = preview["merchant"].apply(categorize)
+                    preview["category_source"] = "auto"
 
                     st.subheader("Preview")
                     st.dataframe(preview, hide_index=True)

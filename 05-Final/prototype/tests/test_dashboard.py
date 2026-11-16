@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from streamlit.testing.v1 import AppTest
@@ -72,3 +73,34 @@ def test_month_without_budget_shows_a_message():
     app.selectbox[0].select("2026-09").run()
     assert not app.exception
     assert any("No budget set for this month." in info.value for info in app.info)
+
+
+def test_correcting_a_category_updates_the_totals():
+    app = AppTest.from_file(str(APP), default_timeout=30)
+    target = {}
+
+    def fake_editor(data, **kwargs):
+        """Stands in for the table: the student changes one Food transaction to Shopping."""
+        edited = data.copy()
+        if "index" not in target:
+            target["index"] = edited[edited["category"] == "Food"].index[0]
+            target["amount"] = float(edited.loc[target["index"], "amount"])
+        edited.loc[target["index"], "category"] = "Shopping"
+        return edited
+
+    app.run()
+    before = app.dataframe[0].value.set_index("category")["Spending (RM)"]
+
+    with patch("streamlit.data_editor", fake_editor):
+        app.run()
+
+    assert not app.exception
+    after = app.dataframe[0].value.set_index("category")["Spending (RM)"]
+    moved = -target["amount"]
+    assert round(before["Food"] - after["Food"], 2) == round(moved, 2)
+    assert round(after["Shopping"] - before["Shopping"], 2) == round(moved, 2)
+
+    saved = app.session_state["sample_transactions"]
+    assert saved.loc[target["index"], "category"] == "Shopping"
+    assert saved.loc[target["index"], "category_source"] == "manual"
+    assert (saved["category_source"] == "manual").sum() == 1
