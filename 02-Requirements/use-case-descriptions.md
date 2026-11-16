@@ -20,11 +20,12 @@ Three use cases are in the requirements but are not built in the prototype (see 
   - 1a. The user has no account: the user registers with an email and a password, then logs in.
   - 3a. The email or the password is wrong: the app shows an error and gives no access. The user can try again.
 - Postconditions: the user is logged in and the sidebar shows only the pages of their role.
+- Prototype: only the three demo accounts exist. Registration (1a) is not built.
 
 ### UC-02 Import transactions from CSV
 - Actor: Student
 - Goal: load bank transactions into the app without typing them
-- Related: US-01, FR-01, NFR-02
+- Related: US-01, FR-01, NFR-02, NFR-03
 - Preconditions: the student is logged in (UC-01)
 - Main flow:
   1. The student opens the Transactions page and chooses a CSV file.
@@ -35,6 +36,7 @@ Three use cases are in the requirements but are not built in the prototype (see 
 - Alternative flows:
   - 2a. A column is missing: the app shows which one and imports nothing.
   - 2b. A row has a date or an amount that is not valid: the app shows the line numbers and imports nothing.
+  - 2c. A row is in a currency other than MYR: the row is imported, but only MYR expenses are counted in the totals.
   - 5a. The student cancels: nothing is saved.
 - Postconditions: the transactions appear in the list and in the totals.
 
@@ -92,14 +94,14 @@ Three use cases are in the requirements but are not built in the prototype (see 
 - Actor: Student
 - Goal: know if the money will last until the next transfer from home
 - Related: US-06, FR-06, NFR-05
-- Preconditions: the student is logged in (UC-01) and has transactions in the current month
+- Preconditions: the student is logged in (UC-01) and has transactions in the month shown (by default the latest month with data)
 - Main flow:
   1. The student opens the Forecast and alerts page and chooses a home currency (EUR, USD, CNY, INR or SAR).
-  2. The app calculates the balance expected at the end of the month in MYR, from the spending so far.
-  3. The app converts the forecast to the home currency with the current rate (forecast in MYR times the rate).
+  2. The app calculates the balance expected at the end of that month in MYR, from the spending so far.
+  3. The app converts the forecast to the home currency with the current rate (forecast in MYR divided by the rate, because the rate is the MYR received for 1 unit of the home currency).
   4. The app shows the forecast in MYR and in the home currency, with the date of the rate.
 - Alternative flows:
-  - 2a. There are no transactions in the current month: the app shows a message and no forecast.
+  - 2a. There are no transactions in that month: the app shows a message and no forecast.
   - 3a. The exchange-rate service is not available: the app uses the last stored rates and says so on the screen (NFR-05).
 - Postconditions: the forecast is shown, and it changes when the transactions change.
 
@@ -120,6 +122,7 @@ Three use cases are in the requirements but are not built in the prototype (see 
 
 ### UC-09 Update exchange rates
 - Actor: Exchange-rate service (external system, frankfurter.dev)
+- Started by: the app, at least once a day
 - Goal: keep the rates between MYR and the home currencies up to date
 - Related: US-12, FR-12, NFR-05
 - Preconditions: none
@@ -135,14 +138,14 @@ Three use cases are in the requirements but are not built in the prototype (see 
 
 ### UC-10 Send rate alert
 - Extends: UC-09, after new rates are stored, when the current rate reaches or passes the student's target (or the 30-day average if no target is set)
-- Related: US-07, FR-07
+- Related: US-07, FR-07, NFR-05
 - Steps:
   1. The app compares the current rate with the target of each student for that home currency.
   2. When the rate is equal to or above the target, the app shows an alert with the rate and the time, for example "Good time to transfer: 1 EUR = x MYR, above your target".
 - Postconditions: the student sees the alert on the Forecast and alerts page.
 
 ### UC-11 Invite sponsor
-- Actor: Student
+- Actor: Student (sends the invitation), Sponsor/parent (accepts it)
 - Goal: let a parent or sponsor follow the budget, only with the student's agreement
 - Related: US-10, FR-10
 - Preconditions: the student is logged in (UC-01)
