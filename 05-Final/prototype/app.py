@@ -91,7 +91,7 @@ if selected_page == "Dashboard":
                 x=alt.X("category:N", title=None, sort=None, axis=alt.Axis(labelAngle=0)),
                 y=alt.Y("Spending (RM):Q"),
             ),
-            use_container_width=True,
+            width="stretch",
         )
         st.dataframe(
             chart_data,
