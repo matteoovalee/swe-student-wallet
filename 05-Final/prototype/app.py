@@ -14,6 +14,40 @@ st.set_page_config(page_title="Student Wallet", page_icon="💳", layout="wide")
 SAMPLE_CSV = Path(__file__).parent / "data" / "transactions.csv"
 BUDGET_CSV = Path(__file__).parent / "data" / "budgets.csv"
 
+STYLE = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+html, body, .stApp, [data-testid="stSidebar"] { font-family: 'Inter', system-ui, sans-serif; }
+[data-testid="stToolbar"], [data-testid="stDecoration"], #MainMenu, footer { display: none !important; }
+.block-container { padding-top: 2.2rem; padding-bottom: 3rem; max-width: 1500px; }
+h1 { font-size: 1.75rem !important; font-weight: 650 !important; letter-spacing: -0.01em; }
+h3 { font-size: 1.05rem !important; font-weight: 600 !important; }
+[class*="st-key-card"], [class*="st-key-kpi"] {
+    background: #FFFFFF;
+    border: 1px solid #E6EBEF !important;
+    border-radius: 16px;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px rgba(15, 23, 42, 0.04);
+}
+[data-testid="stMetricLabel"] p { color: #64748B; font-size: 0.85rem; font-weight: 500; }
+[data-testid="stMetricValue"] { font-size: 1.9rem; font-weight: 650; }
+[data-testid="stAlert"] { border-radius: 12px; }
+.stButton > button { border-radius: 10px; font-weight: 500; }
+</style>
+"""
+st.markdown(STYLE, unsafe_allow_html=True)
+
+
+def save_budget_from_form(month):
+    """Runs when Save budget is clicked, before the page is drawn again."""
+    try:
+        amount = parse_budget(st.session_state[f"budget_{month}"])
+    except ValueError as error:
+        st.session_state["budget_feedback"] = ("error", str(error))
+    else:
+        save_budget(BUDGET_CSV, month, amount)
+        st.session_state["budget_feedback"] = ("success", "Budget saved.")
+
 if "transactions" not in st.session_state:
     st.session_state["transactions"] = None
 
@@ -22,7 +56,15 @@ if "edit_version" not in st.session_state:
     st.session_state["edit_version"] = 0
 
 pages = ["Dashboard", "Transactions", "Exchange rate"]
-selected_page = st.sidebar.radio("Navigate", pages)
+page_icons = {
+    "Dashboard": ":material/dashboard:",
+    "Transactions": ":material/upload_file:",
+    "Exchange rate": ":material/currency_exchange:",
+}
+st.sidebar.markdown("### :material/account_balance_wallet: Student Wallet")
+selected_page = st.sidebar.radio(
+    "Navigate", pages, format_func=lambda page: f"{page_icons[page]} {page}"
+)
 
 st.title(selected_page)
 
@@ -42,82 +84,110 @@ if selected_page == "Dashboard":
 
     df = prepare(st.session_state[data_key])
     df["month"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m")
-    selected_month = st.selectbox("Select Month", sorted(df["month"].unique(), reverse=True))
+    month_col, _ = st.columns([1, 3])
+    selected_month = month_col.selectbox(
+        "Select Month", sorted(df["month"].unique(), reverse=True)
+    )
     month_df = df[df["month"] == selected_month]
 
     expenses = month_df[(month_df["amount"] < 0) & (month_df["currency"] == "MYR")]
     total_spending = -expenses["amount"].sum() + 0.0  # + 0.0: no "-0.00" when there is no spending
-    st.metric("Total Monthly Spending", f"RM {total_spending:,.2f}")
-
-    st.subheader("Monthly Budget")
     saved_budget = load_budget(BUDGET_CSV, selected_month)
-    budget_text = st.text_input(
-        "Budget for this month (RM)",
-        value="" if saved_budget is None else f"{saved_budget:.2f}",
-        key=f"budget_{selected_month}",
-    )
-    if st.button("Save budget"):
-        try:
-            new_budget = parse_budget(budget_text)
-        except ValueError as error:
-            st.error(str(error))
-        else:
-            save_budget(BUDGET_CSV, selected_month, new_budget)
-            saved_budget = new_budget
-            st.success("Budget saved.")
 
     if saved_budget is None:
-        st.info("No budget set for this month.")
+        with st.container(border=True, key="kpi_spent"):
+            st.metric("Total Monthly Spending", f"RM {total_spending:,.2f}")
     else:
         used, left = budget_status(saved_budget, total_spending)
         budget_col, used_col, left_col = st.columns(3)
-        budget_col.metric("Budget", f"RM {saved_budget:,.2f}")
-        used_col.metric("Used", f"RM {used:,.2f}")
-        if left < 0:
-            left_col.markdown(f"Left\n\n## :red[RM {left:,.2f}]")
-        else:
-            left_col.metric("Left", f"RM {left:,.2f}")
+        with budget_col.container(border=True, key="kpi_budget"):
+            st.metric("Budget", f"RM {saved_budget:,.2f}")
+        with used_col.container(border=True, key="kpi_used"):
+            st.metric("Used", f"RM {used:,.2f}")
+        with left_col.container(border=True, key="kpi_left"):
+            if left < 0:
+                st.markdown(f"Left\n\n## :red[RM {left:,.2f}]")
+            else:
+                st.metric("Left", f"RM {left:,.2f}")
+
+    chart_col, side_col = st.columns([3, 2])
+
+    with side_col:
+        with st.container(border=True, key="card_budget"):
+            st.subheader("Monthly Budget")
+            if saved_budget is not None:
+                share = used / saved_budget
+                st.progress(min(share, 1.0), text=f"{share:.0%} of the budget used")
+            st.text_input(
+                "Budget for this month (RM)",
+                value="" if saved_budget is None else f"{saved_budget:.2f}",
+                key=f"budget_{selected_month}",
+            )
+            st.button(
+                "Save budget",
+                type="primary",
+                on_click=save_budget_from_form,
+                args=(selected_month,),
+            )
+            kind, text = st.session_state.pop("budget_feedback", (None, None))
+            if kind == "error":
+                st.error(text)
+            elif kind == "success":
+                st.success(text)
+            if saved_budget is None:
+                st.info("No budget set for this month.")
 
     if expenses.empty:
-        st.info("No MYR expenses in this month.")
+        chart_col.info("No MYR expenses in this month.")
     else:
         category_spending = expenses.groupby("category")["amount"].sum().abs()
-        st.subheader("Spending by Category")
         chart_data = category_spending.rename("Spending (RM)").reset_index()
-        st.altair_chart(
-            alt.Chart(chart_data)
-            .mark_bar()
-            .encode(
-                x=alt.X("category:N", title=None, sort=None, axis=alt.Axis(labelAngle=0)),
-                y=alt.Y("Spending (RM):Q"),
-            ),
-            width="stretch",
-        )
-        st.dataframe(
-            chart_data,
-            hide_index=True,
-            column_config={"Spending (RM)": st.column_config.NumberColumn(format="%.2f")},
-        )
+        with chart_col:
+            with st.container(border=True, key="card_chart"):
+                st.subheader("Spending by Category")
+                st.altair_chart(
+                    alt.Chart(chart_data)
+                    .mark_bar(color="#0F766E", cornerRadiusTopLeft=5, cornerRadiusTopRight=5)
+                    .encode(
+                        x=alt.X("category:N", title=None, sort=None, axis=alt.Axis(labelAngle=0)),
+                        y=alt.Y("Spending (RM):Q", title="RM"),
+                        tooltip=["category", alt.Tooltip("Spending (RM):Q", format=",.2f")],
+                    )
+                    .properties(height=440)
+                    .configure(background="rgba(0,0,0,0)")
+                    .configure_view(stroke=None)
+                    .configure_axis(domain=False, ticks=False, gridColor="#EEF1F4", labelColor="#64748B"),
+                    width="stretch",
+                )
+        with side_col:
+            with st.container(border=True, key="card_table"):
+                st.subheader("By category")
+                st.dataframe(
+                    chart_data,
+                    hide_index=True,
+                    column_config={"Spending (RM)": st.column_config.NumberColumn(format="%.2f")},
+                )
 
-    st.subheader("Transactions of the Month")
-    st.caption("Wrong category? Change it in the table. The chart and the totals update.")
-    columns = ["date", "merchant", "amount", "currency", "category", "category_source"]
-    shown = month_df[columns]
-    edited = st.data_editor(
-        shown,
-        hide_index=True,
-        disabled=[column for column in columns if column != "category"],
-        column_config={
-            "category": st.column_config.SelectboxColumn(
-                "Category", options=CATEGORIES, required=True
-            )
-        },
-        key=f"editor_{selected_month}_{st.session_state['edit_version']}",
-    )
-    if not edited["category"].equals(shown["category"]):
-        st.session_state[data_key] = change_categories(df.drop(columns="month"), edited)
-        st.session_state["edit_version"] += 1
-        st.rerun()
+    with st.container(border=True, key="card_transactions"):
+        st.subheader("Transactions of the Month")
+        st.caption("Wrong category? Change it in the table. The chart and the totals update.")
+        columns = ["date", "merchant", "amount", "currency", "category", "category_source"]
+        shown = month_df[columns]
+        edited = st.data_editor(
+            shown,
+            hide_index=True,
+            disabled=[column for column in columns if column != "category"],
+            column_config={
+                "category": st.column_config.SelectboxColumn(
+                    "Category", options=CATEGORIES, required=True
+                )
+            },
+            key=f"editor_{selected_month}_{st.session_state['edit_version']}",
+        )
+        if not edited["category"].equals(shown["category"]):
+            st.session_state[data_key] = change_categories(df.drop(columns="month"), edited)
+            st.session_state["edit_version"] += 1
+            st.rerun()
 
 elif selected_page == "Transactions":
     uploaded_file = st.file_uploader("Upload a transactions CSV", type=["csv"])
