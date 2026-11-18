@@ -5,6 +5,8 @@ Domain: Smart Financial.
 
 [![tests](https://github.com/matteoovalee/swe-student-wallet/actions/workflows/tests.yml/badge.svg)](https://github.com/matteoovalee/swe-student-wallet/actions/workflows/tests.yml)
 
+Live app: https://swe-student-wallet-group4.streamlit.app/
+
 ## What it is
 
 A web app for international students who spend in MYR with money that comes from home (EUR and others). It sorts expenses into categories automatically, forecasts the end-of-month balance in the home currency, and alerts the student when the exchange rate is good for a transfer.
