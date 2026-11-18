@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -8,7 +9,7 @@ from smart.categorize import categorize
 from smart.category_edit import CATEGORIES, change_categories, prepare
 
 
-st.set_page_config(page_title="Student Wallet", page_icon="💳")
+st.set_page_config(page_title="Student Wallet", page_icon="💳", layout="wide")
 
 SAMPLE_CSV = Path(__file__).parent / "data" / "transactions.csv"
 BUDGET_CSV = Path(__file__).parent / "data" / "budgets.csv"
@@ -82,8 +83,21 @@ if selected_page == "Dashboard":
     else:
         category_spending = expenses.groupby("category")["amount"].sum().abs()
         st.subheader("Spending by Category")
-        st.bar_chart(category_spending)
-        st.dataframe(category_spending.rename("Spending (RM)").reset_index())
+        chart_data = category_spending.rename("Spending (RM)").reset_index()
+        st.altair_chart(
+            alt.Chart(chart_data)
+            .mark_bar()
+            .encode(
+                x=alt.X("category:N", title=None, sort=None, axis=alt.Axis(labelAngle=0)),
+                y=alt.Y("Spending (RM):Q"),
+            ),
+            use_container_width=True,
+        )
+        st.dataframe(
+            chart_data,
+            hide_index=True,
+            column_config={"Spending (RM)": st.column_config.NumberColumn(format="%.2f")},
+        )
 
     st.subheader("Transactions of the Month")
     st.caption("Wrong category? Change it in the table. The chart and the totals update.")
