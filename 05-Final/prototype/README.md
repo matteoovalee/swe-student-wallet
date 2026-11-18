@@ -2,6 +2,10 @@
 
 Python and Streamlit. It is an evolutionary prototype: it starts small and grows sprint by sprint.
 
+## Live app
+
+https://swe-student-wallet-group4.streamlit.app/ (deployed from `main` on Streamlit Community Cloud).
+
 ## Run it
 
 ```
