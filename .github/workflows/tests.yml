@@ -22,5 +22,4 @@ jobs:
       - name: Run tests
         working-directory: 05-Final/prototype
         run: |
-          # exit code 5 means "no tests collected yet": allowed until the first tests exist
-          pytest || [ $? -eq 5 ]
+          pytest
