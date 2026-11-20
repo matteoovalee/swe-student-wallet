@@ -1,4 +1,11 @@
+from calendar import monthrange
+from datetime import date, datetime, timedelta
+import json
+from math import isfinite
 from pathlib import Path
+from urllib.error import URLError
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 import altair as alt
 import pandas as pd
@@ -48,6 +55,120 @@ def save_budget_from_form(month):
         save_budget(BUDGET_CSV, month, amount)
         st.session_state["budget_feedback"] = ("success", "Budget saved.")
 
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def daily_transfer_rates(currency, end):
+    """Return available MYR-per-home-currency quotes in the last 30 calendar days."""
+    start = end - timedelta(days=29)
+    query = urlencode({"base": currency, "quotes": "MYR",
+                       "from": start.isoformat(), "to": end.isoformat()})
+    with urlopen(f"https://api.frankfurter.dev/v2/rates?{query}", timeout=8) as response:
+        rows = json.load(response)
+    daily = {}
+    for row in rows:
+        day = date.fromisoformat(row["date"])
+        rate = float(row["rate"])
+        if (row["base"] == currency and row["quote"] == "MYR"
+                and start <= day <= end and isfinite(rate) and rate > 0):
+            daily[day] = rate
+    return daily
+
+
+def show_forecast(transactions, as_of, currency, quote):
+    from smart.forecast import forecast_end_of_month
+
+    dates = pd.to_datetime(transactions["date"]).dt.date
+    amounts = pd.to_numeric(transactions["amount"])
+    recorded = (transactions["currency"] == "MYR") & (dates <= as_of)
+    month_amounts = amounts[recorded & (dates >= as_of.replace(day=1))]
+    if month_amounts.empty:
+        st.info("No MYR transactions recorded for this month through the selected date.")
+        return
+
+    balance = amounts[recorded].sum()
+    spent = -month_amounts[month_amounts < 0].sum() + 0.0
+    days = monthrange(as_of.year, as_of.month)[1]
+    forecast = forecast_end_of_month(balance, spent, as_of.day, days)
+    left, right = st.columns([3, 2])
+    with left.container(border=True, key="card_forecast"):
+        st.subheader("Balance forecast")
+        st.metric(f"Estimated balance on {as_of.replace(day=days):%d %b}", f"RM {forecast:,.2f}")
+        if quote is not None:
+            st.metric(f"Estimate in {currency}", f"{currency} {forecast * quote:,.2f}")
+        else:
+            st.caption(f"Conversion to {currency} is unavailable.")
+        if as_of.day < days:
+            dates_left = pd.date_range(as_of, periods=days - as_of.day + 1)
+            projection = pd.Series(
+                [balance - spent / as_of.day * i for i in range(len(dates_left))],
+                index=dates_left, name="Balance (MYR)",
+            )
+            st.line_chart(projection, height=190)
+    with right.container(border=True, key="card_spending"):
+        st.subheader("Spending prediction")
+        st.metric("Recorded balance", f"RM {balance:,.2f}")
+        st.write(f"Spent this month: RM {spent:,.2f}")
+        st.write(f"Expected spending through month end: RM {balance - forecast:,.2f}")
+        st.caption("Uses all recorded MYR transactions for the balance and this month's "
+                   "average daily spending. Future deposits are excluded.")
+
+
+def show_rate_alert(currency, quote, today):
+    from smart.alerts import alert_triggered, default_target
+
+    history_key = f"transfer_history_{currency}"
+    try:
+        daily = daily_transfer_rates(currency, today)
+        if not daily:
+            raise ValueError("No daily rates returned")
+        st.session_state[history_key] = daily
+        history_source = "Published daily rates"
+    except (URLError, OSError, ValueError, KeyError, TypeError):
+        cutoff = today - timedelta(days=29)
+        daily = {day: rate for day, rate in st.session_state.get(history_key, {}).items()
+                 if cutoff <= day <= today}
+        history_source = "Saved daily rates"
+
+    average = default_target([daily[d] for d in sorted(daily)]) if daily else None
+    alert_col, settings_col = st.columns([3, 2])
+    targets = st.session_state.setdefault("transfer_targets", {})
+    with settings_col.container(border=True, key="card_alert_settings"):
+        st.subheader("Alert settings")
+        if average is not None:
+            st.write(f"30-day average: {average:.4f} MYR per {currency}")
+            st.caption(f"{history_source} · {len(daily)} quoted days")
+        else:
+            st.caption("30-day average unavailable. Enter a target to check the rate.")
+        with st.form(f"target_form_{currency}"):
+            target_input = st.number_input(
+                f"Target (MYR per {currency})", value=targets.get(currency),
+                min_value=0.000001, format="%.6f", step=0.01,
+                placeholder="Use the 30-day average",
+            )
+            if st.form_submit_button("Save target"):
+                targets[currency] = target_input
+
+    with alert_col.container(border=True, key="card_rate_alert"):
+        st.subheader("Exchange rate alert")
+        target = targets.get(currency)
+        if target is None:
+            target = average
+        if quote is None:
+            st.info(f"No current {currency} rate available.")
+            return
+        transfer_rate = 1 / quote
+        st.metric("Current transfer rate", f"1 {currency} = {transfer_rate:.4f} MYR")
+        if target is None:
+            st.info("Waiting for a target or the 30-day average.")
+        elif alert_triggered(transfer_rate, target):
+            relation = "at" if transfer_rate == target else "above"
+            st.success(f"Good time to transfer: 1 {currency} = {transfer_rate:.4f} MYR, "
+                       f"{relation} your target of {target:.4f}.")
+        else:
+            st.info(f"Below your target of {target:.4f} MYR per {currency}.")
+        st.caption(f"Checked {datetime.now().astimezone():%d %b %Y, %H:%M %Z}")
+
+
 if "transactions" not in st.session_state:
     st.session_state["transactions"] = None
 
@@ -55,11 +176,11 @@ if "transactions" not in st.session_state:
 if "edit_version" not in st.session_state:
     st.session_state["edit_version"] = 0
 
-pages = ["Dashboard", "Transactions", "Exchange rate"]
+pages = ["Dashboard", "Transactions", "Forecast and alerts"]
 page_icons = {
     "Dashboard": ":material/dashboard:",
     "Transactions": ":material/upload_file:",
-    "Exchange rate": ":material/currency_exchange:",
+    "Forecast and alerts": ":material/currency_exchange:",
 }
 st.sidebar.markdown("### :material/account_balance_wallet: Student Wallet")
 selected_page = st.sidebar.radio(
@@ -238,4 +359,30 @@ elif selected_page == "Transactions":
             st.error(f"Could not read the CSV file: {error}")
 
 else:
-    st.write("Exchange rate page")
+    from exchange_rates import TARGET_CURRENCIES, get_rates
+
+    today = date.today()
+    transactions = st.session_state["transactions"]
+    if transactions is None:
+        transactions = pd.read_csv(SAMPLE_CSV, encoding="utf-8-sig")
+        default_day = min(today, pd.to_datetime(transactions["date"]).max().date())
+        st.caption("Sample transactions · import a CSV on the Transactions page to use your own.")
+    else:
+        default_day = today
+
+    currency_col, day_col = st.columns(2)
+    currency = currency_col.selectbox("Home currency", TARGET_CURRENCIES)
+    as_of = day_col.date_input("Forecast as of", value=default_day, max_value=today)
+    rates, rate_date, source = get_rates()
+    quote = rates.get(currency)
+    if quote is not None and (not isfinite(quote) or quote <= 0):
+        quote = None
+    if source == "Fallback data":
+        st.warning("Using saved demo exchange rates. The live service is unavailable.")
+    elif source == "Cached data":
+        st.warning(f"Using the last saved exchange rates from {rate_date}.")
+    else:
+        st.caption(f"Exchange rates as of {rate_date} · Frankfurter")
+
+    show_forecast(transactions, as_of, currency, quote)
+    show_rate_alert(currency, quote, today)
