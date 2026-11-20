@@ -9,7 +9,7 @@ Design artefacts of the Student Wallet. Diagrams are made in draw.io and wirefra
 The app has three tiers, as in the lesson on design tools (UI, application, database):
 
 - Presentation tier: the Streamlit pages in `app.py`. Which pages a user sees depends on the role (student, sponsor, admin).
-- Application tier: the business logic. The smart features are in the `smart/` module (`categorize.py`, `forecast.py`, `rate_alert.py`), next to authentication and `exchange_rates.py`.
+- Application tier: the business logic. The smart features are in the `smart/` module (`categorize.py`, `forecast.py`, `alerts.py`), next to authentication and `exchange_rates.py`.
 - Data tier: simple files with fake data (transactions, demo accounts, category keywords, rate history). No real bank data is used.
 
 The only external system is the exchange-rate service frankfurter.dev. If it is down, the app uses the last good rates, then labelled demo values.
