@@ -21,6 +21,7 @@ def keep_budget_file():
 
 def run_dashboard():
     app = AppTest.from_file(str(APP), default_timeout=30)
+    app.session_state["user_role"] = "student"
     app.run()
     return app
 
@@ -77,6 +78,7 @@ def test_month_without_budget_shows_a_message():
 
 def test_correcting_a_category_updates_the_totals():
     app = AppTest.from_file(str(APP), default_timeout=30)
+    app.session_state["user_role"] = "student"
     target = {}
 
     def fake_editor(data, **kwargs):

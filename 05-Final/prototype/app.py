@@ -14,9 +14,18 @@ import streamlit as st
 from smart.budget import budget_status, load_budget, parse_budget, save_budget
 from smart.categorize import categorize
 from smart.category_edit import CATEGORIES, change_categories, prepare
+from smart.auth import authenticate
 
 
-st.set_page_config(page_title="Student Wallet", page_icon="💳", layout="wide")
+
+
+st.set_page_config(
+    page_title="Student Wallet",
+    page_icon="💳",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 
 SAMPLE_CSV = Path(__file__).parent / "data" / "transactions.csv"
 BUDGET_CSV = Path(__file__).parent / "data" / "budgets.csv"
@@ -25,7 +34,7 @@ STYLE = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 html, body, .stApp, [data-testid="stSidebar"] { font-family: 'Inter', system-ui, sans-serif; }
-[data-testid="stToolbar"], [data-testid="stDecoration"], #MainMenu, footer { display: none !important; }
+[data-testid="stDecoration"], #MainMenu, footer { display: none !important; }
 .block-container { padding-top: 2.2rem; padding-bottom: 3rem; max-width: 1500px; }
 h1 { font-size: 1.75rem !important; font-weight: 650 !important; letter-spacing: -0.01em; }
 h3 { font-size: 1.05rem !important; font-weight: 600 !important; }
@@ -47,6 +56,10 @@ st.markdown(STYLE, unsafe_allow_html=True)
 
 def save_budget_from_form(month):
     """Runs when Save budget is clicked, before the page is drawn again."""
+    
+    if st.session_state.get("user_role") == "sponsor":
+        return
+
     try:
         amount = parse_budget(st.session_state[f"budget_{month}"])
     except ValueError as error:
@@ -176,13 +189,49 @@ if "transactions" not in st.session_state:
 if "edit_version" not in st.session_state:
     st.session_state["edit_version"] = 0
 
-pages = ["Dashboard", "Transactions", "Forecast and alerts"]
+if "user_role" not in st.session_state:
+    st.session_state["user_role"] = None
+
+if st.session_state["user_role"] is None:
+    st.title("Student Wallet Login")
+
+    with st.form("login_form"):
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Log In")
+
+    if submitted:
+        role = authenticate(email, password)
+
+        if role is not None:
+            st.session_state["user_role"] = role
+            st.rerun()
+        else:
+            st.error("Invalid email or password.")
+
+    st.stop()
+
+
+role = st.session_state["user_role"]
+
+if role == "sponsor":
+    pages = ["Dashboard"]
+else:
+    pages = ["Dashboard", "Transactions", "Forecast and alerts"]
+
 page_icons = {
     "Dashboard": ":material/dashboard:",
     "Transactions": ":material/upload_file:",
     "Forecast and alerts": ":material/currency_exchange:",
 }
 st.sidebar.markdown("### :material/account_balance_wallet: Student Wallet")
+
+st.sidebar.caption(f"Signed in as: {role.title()}")
+
+if st.sidebar.button("Log Out"):
+    st.session_state.clear()
+    st.rerun()
+
 selected_page = st.sidebar.radio(
     "Navigate", pages, format_func=lambda page: f"{page_icons[page]} {page}"
 )
@@ -243,12 +292,15 @@ if selected_page == "Dashboard":
                 "Budget for this month (RM)",
                 value="" if saved_budget is None else f"{saved_budget:.2f}",
                 key=f"budget_{selected_month}",
-            )
+                disabled=(role == "sponsor"),
+
+        )
             st.button(
                 "Save budget",
                 type="primary",
                 on_click=save_budget_from_form,
                 args=(selected_month,),
+                disabled=(role == "sponsor"),
             )
             kind, text = st.session_state.pop("budget_feedback", (None, None))
             if kind == "error":
@@ -297,7 +349,7 @@ if selected_page == "Dashboard":
         edited = st.data_editor(
             shown,
             hide_index=True,
-            disabled=[column for column in columns if column != "category"],
+            disabled=True if role == "sponsor" else [column for column in columns if column != "category"],
             column_config={
                 "category": st.column_config.SelectboxColumn(
                     "Category", options=CATEGORIES, required=True
@@ -305,7 +357,8 @@ if selected_page == "Dashboard":
             },
             key=f"editor_{selected_month}_{st.session_state['edit_version']}",
         )
-        if not edited["category"].equals(shown["category"]):
+        if role != "sponsor" and not edited["category"].equals(shown["category"]):
+
             st.session_state[data_key] = change_categories(df.drop(columns="month"), edited)
             st.session_state["edit_version"] += 1
             st.rerun()
