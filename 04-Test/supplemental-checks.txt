@@ -1,0 +1,24 @@
+TC-07: Controlled conversion at 1 EUR = 5 MYR: EUR80 before and EUR50 after the RM50 expense; PASS (function-level supplement).
+2026-11-23 16:24:11.748 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-23 16:24:11.748 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+TC-08: AppTest rendered current=4.99, target=5.00, alert=False; rate and timestamp displayed; PASS.
+TC-08: AppTest rendered current=5.00, target=5.00, alert=True; rate and timestamp displayed; PASS.
+TC-08: AppTest rendered current=5.01, target=5.00, alert=True; rate and timestamp displayed; PASS.
+2026-11-23 16:24:12.633 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-23 16:24:12.633 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+TC-09: Fresh blank target uses controlled 30-day average5; below/equal states correct. Previously saved-target clearing failure reported manually remains FAIL; not retested as fixed.
+TC-14: Controlled successful update for all5 currencies on two consecutive days; failed refresh preserves latest valid CSV. Adapter fallback is checked below. Cache TTL3600seconds verified by source review.
+2026-11-23 16:24:12.981 No runtime found, using MemoryCacheStorageManager
+2026-11-23 16:24:13.038 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-23 16:24:13.038 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+TC-21: Simulated outage +24hours: rendered forecastRM420.46, EUR84.93 and alert work using saved2026-11-21 rates; no live requests succeed; PASS.
+2026-11-23 16:24:13.306 No runtime found, using MemoryCacheStorageManager
+2026-11-23 16:24:13.306 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-23 16:24:13.306 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+TC-21: Simulated outage +48hours: rendered forecastRM420.46, EUR84.93 and alert work using saved2026-11-21 rates; no live requests succeed; PASS.
+2026-11-23 16:24:13.576 No runtime found, using MemoryCacheStorageManager
+2026-11-23 16:24:13.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-23 16:24:13.942 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+TC-20: Different salted hashes for identical dummy passwords; stored demo records hashed; Sponsor controls disabled and injected editor change not committed; budget file unchanged. Manual sponsor no-add/edit/delete checks also recorded. PASS for supported app actions.
+TC-23: Reviewed synthetic transaction declaration, transaction fields,20 anonymous survey rows with no name/email fields and P1-P5 UAT notes; demo emails are synthetic login accounts. PASS for reviewed evidence.
+SUPPLEMENTAL CHECKS COMPLETED
