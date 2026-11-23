@@ -1,0 +1,17 @@
+Source commit: e87ecd4436c2fab5e6d89f52394871a2a5afa077
+Execution date: 23 November 2026
+Execution environment: local automated verification (separate from Abbod manual tests)
+Command: python3 -m pytest -q
+
+........................................................................ [ 94%]
+....                                                                     [100%]
+=============================== warnings summary ===============================
+[environment]/lib/python3.12/site-packages/anyio/pytest_plugin.py:14
+  [environment]/lib/python3.12/site-packages/anyio/pytest_plugin.py:14: PytestRemovedIn10Warning: _pytest.python.CallSpec2 has been renamed to CallSpec.
+  The CallSpec2 alias will be removed in pytest 10.
+  Update imports to use CallSpec instead.
+  See https://docs.pytest.org/en/stable/deprecations.html#callspec2-renamed
+    from _pytest.python import CallSpec2
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+76 passed, 1 warning in 4.31s
