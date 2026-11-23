@@ -158,8 +158,14 @@ def show_rate_alert(currency, quote, today):
                 min_value=0.000001, format="%.6f", step=0.01,
                 placeholder="Use the 30-day average",
             )
-            if st.form_submit_button("Save target"):
+            save_col, reset_col = st.columns(2)
+            saved = save_col.form_submit_button("Save target")
+            reset = reset_col.form_submit_button("Use average")
+            if saved:
                 targets[currency] = target_input
+            if reset:
+                targets.pop(currency, None)
+                st.rerun()
 
     with alert_col.container(border=True, key="card_rate_alert"):
         st.subheader("Exchange rate alert")
