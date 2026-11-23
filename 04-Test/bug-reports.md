@@ -1,6 +1,6 @@
-# Bug reports ready for GitHub
+# Bug reports
 
-These drafts have NOT been posted. Apply the bug label and retain the TC ID in the title.
+Each report is also a GitHub issue with the `bug` label and the test case ID in the title.
 
 ## TC-09: Clearing a saved exchange-rate target restores the previous value
 

@@ -44,4 +44,4 @@ TC-22: active ruleset [protect-main](https://github.com/matteoovalee/swe-student
 - TC-22: passing automated checks are not required by the active main-branch ruleset. Recheck after repository administrator adds the required workflow check.
 - TC-13: admin category management is not implemented.
 
-Ready-to-post bug descriptions are in [bug-reports.md](bug-reports.md). Direct GitHub creation returned403 Resource not accessible by integration; no issues or PR were created during this verification session. Earlier PR83 was closed without merge, so it is not a completed submission.
+Bug descriptions are in [bug-reports.md](bug-reports.md). Each one is also a GitHub issue with the `bug` label.
